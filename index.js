@@ -6,11 +6,7 @@ const isNum = data => typeof data === 'number'
 
 const throwing = (isThrow, message, isType) => {
   if (isThrow) {
-    if (isType) {
-      throw new TypeError(message)
-    } else {
-      throw new Error(message)
-    }
+    throw isType ? new TypeError(message) : new Error(message)
   }
 }
 
@@ -28,12 +24,14 @@ export class Indexes {
   constructor(length, maxIncrement) {
     throwing(
       !isNum(length),
-      'Indexes as Super class arg:length must be "number"'
+      'Indexes as Super class arg:length must be "number"',
+      true
     )
     throwing(length < 0, 'Indexes as Super class arg:length must be >= 0')
     throwing(
       !isNum(maxIncrement),
-      'Indexes as Super class arg:maxIncrement must be "number"'
+      'Indexes as Super class arg:maxIncrement must be "number"',
+      true
     )
     throwing(
       maxIncrement <= 0,
@@ -41,7 +39,8 @@ export class Indexes {
     )
     throwing(
       !isFnc(this.nowindex),
-      'Indexes as Super class method:nowindex must be "function"'
+      'Indexes as Super class method:nowindex must be "function"',
+      true
     )
 
     this._length = length
@@ -73,7 +72,7 @@ export class Indexes {
     )
 
     indexesAdded.forEach(index => this.indexesAdd(index))
-    return { index, length: indexesAdded.length }
+    return indexesAdded
   }
 
   done() {
@@ -123,15 +122,18 @@ export class IndexesRandom extends Indexes {
 const tiloop = (indexes, createValue) => {
   throwing(
     !isFnc(indexes.indexesExtend),
-    'tiloop first argument as indexes must have method:indexesExtend'
+    'tiloop first argument as indexes must have method:indexesExtend',
+    true
   )
   throwing(
     !isFnc(indexes.done),
-    'tiloop first argument as indexes must have method:done'
+    'tiloop first argument as indexes must have method:done',
+    true
   )
   throwing(
     !isFnc(createValue),
-    'tiloop second argument as createValue must be "function"'
+    'tiloop second argument as createValue must be "function"',
+    true
   )
 
   return loop(indexes, createValue)
@@ -148,7 +150,7 @@ function* loop(indexes, createValue) {
       yield value
     }
 
-    if (typeof indexes.prepare === 'function') {
+    if (isFnc(indexes.prepare)) {
       indexes.prepare()
     }
   }

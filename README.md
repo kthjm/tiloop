@@ -14,8 +14,9 @@ const iterator = tiloop(
     length: 3000,
     maxIncrement: 20
   }),
-  ({ index, length }) => {
-
+  (array) => {
+    const index = array[0]
+    const length = array.length
   }
 )
 ```

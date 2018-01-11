@@ -94,6 +94,6 @@ describe('indexes.indexes.size === length', () => {
   })
 
   function justToArray(indexes) {
-    ;[...tiloop(indexes, ({ index, length }) => {})]
+    ;[...tiloop(indexes, array => {})]
   }
 })
