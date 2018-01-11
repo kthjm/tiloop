@@ -1,0 +1,20 @@
+{
+  "env": {
+    "TEST": {
+      "presets": [
+        ["env", { "targets": { "node": "current" } }],
+        "flow",
+        "power-assert"
+      ],
+      "plugins": [
+        "istanbul",
+        "rewire"
+      ]
+    },
+    "BUILD": {
+      "presets": [
+        "es2015-rollup"
+      ]
+    }
+  }
+}
