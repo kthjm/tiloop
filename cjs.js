@@ -207,7 +207,7 @@ var Indexes = (function() {
     {
       key: 'done',
       value: function done() {
-        return this.indexes.size >= this._length
+        return this.indexes.size === this._length
       }
     }
   ])

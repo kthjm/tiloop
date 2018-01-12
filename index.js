@@ -76,7 +76,7 @@ export class Indexes {
   }
 
   done() {
-    return this.indexes.size >= this._length
+    return this.indexes.size === this._length
   }
 }
 
