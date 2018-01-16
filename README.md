@@ -7,6 +7,12 @@
 
 Create iterator that have done coincident with covering all index of virtual array.
 
+## Installation
+```shell
+yarn add tiloop
+```
+
+## Usage
 ```js
 import tiloop, { IndexesZero } from 'tiloop'
 
@@ -16,7 +22,7 @@ const iterator = tiloop(
     maxIncrement: 20
   }),
   (array) => {
-    // result will be value
+    // result will be { value } = iterator.next()
   }
 )
 ```
@@ -39,3 +45,11 @@ class MyIndexes extends Indexes {
   }
 }
 ```
+
+## Indexes
+- `IndexesZero({ length, maxIncrement })`
+
+- `IndexesRandom({ length, maxIncrement })`
+
+## License
+MIT (http://opensource.org/licenses/MIT)
