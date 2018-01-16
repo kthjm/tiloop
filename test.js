@@ -10,24 +10,24 @@ describe('throws', () => {
     const f = () => {}
     const notFunctions = ['string', 10, true, undefined, null, {}, []]
 
-    notFunctions.forEach(indexesExtend =>
+    notFunctions.forEach(nextIndexes =>
       assert.throws(
-        () => tiloop({ indexesExtend }),
-        /tiloop first argument as indexes must have method:indexesExtend/
+        () => tiloop({ nextIndexes }),
+        /tiloop first argument as indexes must have method:nextIndexes/
       )
     )
 
     notFunctions.forEach(done =>
       assert.throws(
-        () => tiloop({ indexesExtend: f, done }),
+        () => tiloop({ nextIndexes: f, done }),
         /tiloop first argument as indexes must have method:done/
       )
     )
 
-    notFunctions.forEach(createValue =>
+    notFunctions.forEach(user =>
       assert.throws(
-        () => tiloop({ indexesExtend: f, done: f }, createValue),
-        /tiloop second argument as createValue must be/
+        () => tiloop({ nextIndexes: f, done: f }, user),
+        /tiloop second argument as user must be/
       )
     )
   })
@@ -40,36 +40,25 @@ describe('throws', () => {
     notNumbers.forEach(length =>
       assert.throws(
         () => new Indexes(length, n),
-        /Indexes as Super class arg:length must be "number"/
+        /Indexes as Super class that first arg:length must be "number"/
       )
     )
 
     assert.throws(
       () => new Indexes(-1, n),
-      /Indexes as Super class arg:length must be >= 0/
+      /Indexes as Super class that first arg:length must be >= 0/
     )
 
     notNumbers.forEach(maxIncrement =>
       assert.throws(
         () => new Indexes(n, maxIncrement),
-        /Indexes as Super class arg:maxIncrement must be "number"/
+        /Indexes as Super class that second arg:maxIncrement must be "number"/
       )
     )
 
     assert.throws(
       () => new Indexes(n, 0),
-      /Indexes as Super class arg:maxIncrement must be > 0/
-    )
-
-    class IndexesNotHaveNowindex extends Indexes {
-      constructor(length, maxIncrement) {
-        super(length, maxIncrement)
-      }
-    }
-
-    assert.throws(
-      () => new IndexesNotHaveNowindex(n, n),
-      /Indexes as Super class method:nowindex must be "function"/
+      /Indexes as Super class that second arg:maxIncrement must be > 0/
     )
   })
 })

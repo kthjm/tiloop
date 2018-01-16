@@ -138,23 +138,21 @@ var Indexes = (function() {
 
     throwing(
       !isNum(length),
-      'Indexes as Super class arg:length must be "number"',
+      'Indexes as Super class that first arg:length must be "number"',
       true
     )
-    throwing(length < 0, 'Indexes as Super class arg:length must be >= 0')
+    throwing(
+      length < 0,
+      'Indexes as Super class that first arg:length must be >= 0'
+    )
     throwing(
       !isNum(maxIncrement),
-      'Indexes as Super class arg:maxIncrement must be "number"',
+      'Indexes as Super class that second arg:maxIncrement must be "number"',
       true
     )
     throwing(
       maxIncrement <= 0,
-      'Indexes as Super class arg:maxIncrement must be > 0'
-    )
-    throwing(
-      !isFnc(this.nowindex),
-      'Indexes as Super class method:nowindex must be "function"',
-      true
+      'Indexes as Super class that second arg:maxIncrement must be > 0'
     )
 
     this._length = length
@@ -177,10 +175,9 @@ var Indexes = (function() {
     },
     {
       key: 'indexesExtend',
-      value: function indexesExtend() {
+      value: function indexesExtend(index) {
         var _this = this
 
-        var index = this.nowindex()
         var maxIncrement = this._maxIncrement
         var lastIndex = this._length - 1
 
@@ -238,9 +235,9 @@ var IndexesZero = (function(_Indexes) {
 
   createClass(IndexesZero, [
     {
-      key: 'nowindex',
-      value: function nowindex() {
-        return this.index
+      key: 'nextIndexes',
+      value: function nextIndexes() {
+        return this.indexesExtend(this.index)
       }
     },
     {
@@ -286,9 +283,9 @@ var IndexesRandom = (function(_Indexes2) {
       }
     },
     {
-      key: 'nowindex',
-      value: function nowindex() {
-        return this.index
+      key: 'nextIndexes',
+      value: function nextIndexes() {
+        return this.indexesExtend(this.index)
       }
     },
     {
@@ -301,10 +298,10 @@ var IndexesRandom = (function(_Indexes2) {
   return IndexesRandom
 })(Indexes)
 
-var tiloop = function tiloop(indexes, createValue) {
+var tiloop = function tiloop(indexes, user) {
   throwing(
-    !isFnc(indexes.indexesExtend),
-    'tiloop first argument as indexes must have method:indexesExtend',
+    !isFnc(indexes.nextIndexes),
+    'tiloop first argument as indexes must have method:nextIndexes',
     true
   )
   throwing(
@@ -313,23 +310,23 @@ var tiloop = function tiloop(indexes, createValue) {
     true
   )
   throwing(
-    !isFnc(createValue),
-    'tiloop second argument as createValue must be "function"',
+    !isFnc(user),
+    'tiloop second argument as user must be "function"',
     true
   )
 
-  return loop(indexes, createValue)
+  return loop(indexes, user)
 }
 
-function loop(indexes, createValue) {
-  var result, value
+function loop(indexes, user) {
+  var array, value
   return regeneratorRuntime.wrap(
     function loop$(_context2) {
       while (1) {
         switch ((_context2.prev = _context2.next)) {
           case 0:
-            result = indexes.indexesExtend()
-            value = createValue(result)
+            array = indexes.nextIndexes()
+            value = user(array)
 
             if (!indexes.done()) {
               _context2.next = 7
@@ -343,7 +340,7 @@ function loop(indexes, createValue) {
             return value
 
           case 9:
-            if (isFnc(indexes.prepare)) {
+            if (indexes.prepare && isFnc(indexes.prepare)) {
               indexes.prepare()
             }
             _context2.next = 0
