@@ -37,7 +37,7 @@ const { value, done } = iterator.next()
 
 `tiloop` create `iterator` that return `done` with last `value`.
 
-In other words, using result as `iterable` not `iterator` **will lost the last `value`**😔.
+In other words, using result as `iterable` not `iterator` **will lost the last `value`** 😔.
 
 ```js
 const iterator = tiloop(indexes,yielded) // done with last value
