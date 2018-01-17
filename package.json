@@ -6,7 +6,7 @@
   "license": "MIT",
   "description":
     "Create iterator done coincident with covering all index of virtual array.",
-  "keywords": ["array", "api"],
+  "keywords": ["iterator", "iterable", "array", "api"],
   "main": "./cjs.js",
   "jsnext:main": "./es.js",
   "module": "./es.js",
