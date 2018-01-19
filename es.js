@@ -259,6 +259,7 @@ var IndexesRandom = (function(_Indexes2) {
       )
     )
 
+    _this3.length = length
     _this3.lastIndex = length - 1
     _this3.index = _this3.createIndex()
     return _this3
@@ -280,10 +281,10 @@ var IndexesRandom = (function(_Indexes2) {
           times++
           return this.createIndex(times)
         } else {
-          var _index = numToArr(this.lastIndex).find(function(num) {
+          var nowMinimumIndex = numToArr(this.length).find(function(num) {
             return !_this4.indexesHas(num)
           })
-          return typeof _index === 'number' ? _index : this.createIndex(2)
+          return nowMinimumIndex
         }
       }
     },

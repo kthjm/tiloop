@@ -111,11 +111,13 @@ export class IndexesZero extends Indexes {
 }
 
 export class IndexesRandom extends Indexes {
+  length: number
   lastIndex: number
   index: number
 
   constructor({ length, maxIncrement }: Argument$Sub): void {
     super(length, maxIncrement)
+    this.length = length
     this.lastIndex = length - 1
     this.index = this.createIndex()
   }
@@ -128,10 +130,11 @@ export class IndexesRandom extends Indexes {
       times++
       return this.createIndex(times)
     } else {
-      const index: number | void = numToArr(this.lastIndex).find(
+      const nowMinimumIndex: any = numToArr(this.length).find(
         num => !this.indexesHas(num)
       )
-      return typeof index === 'number' ? index : this.createIndex(2)
+      ;(nowMinimumIndex: number)
+      return nowMinimumIndex
     }
   }
 
