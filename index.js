@@ -120,11 +120,19 @@ export class IndexesRandom extends Indexes {
     this.index = this.createIndex()
   }
 
-  createIndex(): number {
+  createIndex(times: number = 0): number {
     const index = Math.round(this.lastIndex * Math.random())
-    return typeof index === 'number' && !this.indexesHas(index)
-      ? index
-      : this.createIndex()
+    if (typeof index === 'number' && !this.indexesHas(index)) {
+      return index
+    } else if (times < 3) {
+      times++
+      return this.createIndex(times)
+    } else {
+      const index: number | void = numToArr(this.lastIndex).find(
+        num => !this.indexesHas(num)
+      )
+      return typeof index === 'number' ? index : this.createIndex(2)
+    }
   }
 
   nextIndexes(): IndexesAdded {

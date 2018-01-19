@@ -268,10 +268,23 @@ var IndexesRandom = (function(_Indexes2) {
     {
       key: 'createIndex',
       value: function createIndex() {
+        var _this4 = this
+
+        var times =
+          arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0
+
         var index = Math.round(this.lastIndex * Math.random())
-        return typeof index === 'number' && !this.indexesHas(index)
-          ? index
-          : this.createIndex()
+        if (typeof index === 'number' && !this.indexesHas(index)) {
+          return index
+        } else if (times < 3) {
+          times++
+          return this.createIndex(times)
+        } else {
+          var _index = numToArr(this.lastIndex).find(function(num) {
+            return !_this4.indexesHas(num)
+          })
+          return typeof _index === 'number' ? _index : this.createIndex(2)
+        }
       }
     },
     {

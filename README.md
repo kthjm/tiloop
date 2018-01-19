@@ -23,7 +23,7 @@ const iterator = tiloop(
     maxIncrement: 20
   }),
   (array) => {
-    // result will be { value }
+    // result will be value
   }
 )
 
@@ -46,7 +46,10 @@ const array = [...tiloop(indexes,yielded)] // not includes last value
 
 ## Indexes
 #### `IndexesZero({ length, maxIncrement })`
+*0 to (length - 1)*
+
 #### `IndexesRandom({ length, maxIncrement })`
+*random*
 
 and able to use with custom indexes.
 
