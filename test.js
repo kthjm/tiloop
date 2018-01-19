@@ -4,6 +4,11 @@ import sinon from 'sinon'
 
 const modules = rewire('./index.js')
 
+it('numToArr', () => {
+  const numToArr = modules.__get__('numToArr')
+  assert.deepEqual(numToArr(3), [0, 1, 2])
+})
+
 describe('throws', () => {
   it('default as tiloop', () => {
     const tiloop = modules.default

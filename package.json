@@ -1,12 +1,12 @@
 {
   "name": "tiloop",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "repository": "kthjm/tiloop",
   "author": "kthjm <toxictoxer@gmail.com>",
   "license": "MIT",
   "description":
     "Create iterator done coincident with covering all index of virtual array.",
-  "keywords": ["iterator", "iterable", "array", "api"],
+  "keywords": ["iterator", "iterable", "generator", "array", "api"],
   "main": "./cjs.js",
   "jsnext:main": "./es.js",
   "module": "./es.js",
