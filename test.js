@@ -50,8 +50,8 @@ describe('throws', () => {
     )
 
     assert.throws(
-      () => new Indexes(-1, n),
-      /Indexes as Super class that first arg:length must be >= 0/
+      () => new Indexes(0, n),
+      /Indexes as Super class that first arg:length must be > 0/
     )
 
     notNumbers.forEach(maxIncrement =>
