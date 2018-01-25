@@ -40,8 +40,8 @@ export class Indexes {
       true
     )
     throwing(
-      length < 0,
-      'Indexes as Super class that first arg:length must be >= 0'
+      length <= 0,
+      'Indexes as Super class that first arg:length must be > 0'
     )
     throwing(
       !isNum(maxIncrement),
