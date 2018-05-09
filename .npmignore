@@ -2,9 +2,8 @@ flow-typed/
 .babelrc
 .flowconfig
 .gitignore
-.prettierignore
 .travis.yml
 index.js
-rollup.config.all.js
+rollup.config.js
 test.js
 yarn.lock
