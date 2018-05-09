@@ -55,6 +55,9 @@ function _classCallCheck(instance, Constructor) {
   }
 }
 
+var _marked = /*#__PURE__*/ regeneratorRuntime.mark(numToArrGenerate)
+var _marked2 = /*#__PURE__*/ regeneratorRuntime.mark(loop)
+
 function _toConsumableArray(arr) {
   if (Array.isArray(arr)) {
     for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
@@ -66,9 +69,6 @@ function _toConsumableArray(arr) {
   }
 }
 
-var _marked = /*#__PURE__*/ regeneratorRuntime.mark(numToArrGenerate)
-var _marked2 = /*#__PURE__*/ regeneratorRuntime.mark(loop)
-
 //
 var isFnc = function isFnc(data) {
   return typeof data === 'function'
@@ -77,10 +77,15 @@ var isNum = function isNum(data) {
   return typeof data === 'number'
 }
 
+var throws = function throws(message) {
+  throw new Error(message)
+}
 var asserts = function asserts(condition, message) {
-  if (!condition) {
-    throw new Error(message)
-  }
+  return !condition && throws(message)
+}
+
+var numToArr = function numToArr(num) {
+  return [].concat(_toConsumableArray(numToArrGenerate(num)))
 }
 
 function numToArrGenerate(num) {
@@ -117,47 +122,60 @@ function numToArrGenerate(num) {
   )
 }
 
-var numToArr = function numToArr(num) {
-  return [].concat(_toConsumableArray(numToArrGenerate(num)))
+var index = function() {
+  var _ref =
+      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+    length = _ref.length,
+    maxIncrement = _ref.maxIncrement,
+    yielded = _ref.yielded,
+    random = _ref.random
+
+  return create(
+    random
+      ? new IndexesRandom({ length: length, maxIncrement: maxIncrement })
+      : new IndexesZero({ length: length, maxIncrement: maxIncrement }),
+    yielded
+  )
 }
 
-var index = function(indexes, user) {
+var create = function create(indexes, yielded) {
   asserts(
-    isFnc(indexes.nextIndexes),
-    'tiloop first argument as indexes must have method:nextIndexes'
+    isFnc(indexes.next),
+    'tiloop first argument as indexes must have method:next'
   )
   asserts(
     isFnc(indexes.done),
     'tiloop first argument as indexes must have method:done'
   )
-  asserts(isFnc(user), 'tiloop second argument as user must be "function"')
-  return loop(indexes, user)
+  asserts(
+    isFnc(yielded),
+    'tiloop second argument as yielded must be "function"'
+  )
+  return loop(indexes, yielded)
 }
 
-function loop(indexes, user) {
+function loop(indexes, yielded) {
   var array
   return regeneratorRuntime.wrap(
     function loop$(_context2) {
       while (1) {
         switch ((_context2.prev = _context2.next)) {
           case 0:
-            array = indexes.nextIndexes()
+            array = indexes.next()
 
             if (!indexes.done()) {
               _context2.next = 6
               break
             }
 
-            return _context2.abrupt('return', user(array))
+            return _context2.abrupt('return', yielded(array))
 
           case 6:
             _context2.next = 8
-            return user(array)
+            return yielded(array)
 
           case 8:
-            if (isFnc(indexes.prepare)) {
-              indexes.prepare()
-            }
+            if (isFnc(indexes.prepare)) indexes.prepare()
             _context2.next = 0
             break
 
@@ -198,16 +216,16 @@ var Indexes = (function() {
       }
     },
     {
-      key: 'indexesExtend',
-      value: function indexesExtend(index) {
+      key: 'extendIndexes',
+      value: function extendIndexes(index) {
         var _this = this
 
         var indexesAdded = numToArr(this._maxIncrement)
           .map(function(i) {
             return index + i
           })
-          .filter(function(preindex) {
-            return !_this.indexesHas(preindex) && preindex <= _this._lastIndex
+          .filter(function(index) {
+            return !_this.indexesHas(index) && index <= _this._lastIndex
           })
 
         // should not be but may be.
@@ -237,9 +255,9 @@ var Indexes = (function() {
 var IndexesZero = (function(_Indexes) {
   _inherits(IndexesZero, _Indexes)
 
-  function IndexesZero(_ref) {
-    var length = _ref.length,
-      maxIncrement = _ref.maxIncrement
+  function IndexesZero(_ref2) {
+    var length = _ref2.length,
+      maxIncrement = _ref2.maxIncrement
 
     _classCallCheck(this, IndexesZero)
 
@@ -252,16 +270,16 @@ var IndexesZero = (function(_Indexes) {
       )
     )
 
-    _this2.index = 0
     _this2.maxIncrement = maxIncrement
+    _this2.index = 0
     return _this2
   }
 
   _createClass(IndexesZero, [
     {
-      key: 'nextIndexes',
-      value: function nextIndexes() {
-        return this.indexesExtend(this.index)
+      key: 'next',
+      value: function next() {
+        return this.extendIndexes(this.index)
       }
     },
     {
@@ -278,9 +296,32 @@ var IndexesZero = (function(_Indexes) {
 var IndexesRandom = (function(_Indexes2) {
   _inherits(IndexesRandom, _Indexes2)
 
-  function IndexesRandom(_ref2) {
-    var length = _ref2.length,
-      maxIncrement = _ref2.maxIncrement
+  _createClass(IndexesRandom, [
+    {
+      key: 'createIndex',
+      value: function createIndex() {
+        var _this4 = this
+
+        var times =
+          arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0
+
+        var index = Math.round(this.lastIndex * Math.random())
+
+        if (isNum(index) && !this.indexesHas(index)) return index
+
+        if (times < 3) return this.createIndex(times + 1)
+
+        var findedIndex = numToArr(this.length).find(function(num) {
+          return !_this4.indexesHas(num)
+        })
+        return findedIndex
+      }
+    }
+  ])
+
+  function IndexesRandom(_ref3) {
+    var length = _ref3.length,
+      maxIncrement = _ref3.maxIncrement
 
     _classCallCheck(this, IndexesRandom)
 
@@ -301,31 +342,9 @@ var IndexesRandom = (function(_Indexes2) {
 
   _createClass(IndexesRandom, [
     {
-      key: 'createIndex',
-      value: function createIndex() {
-        var _this4 = this
-
-        var times =
-          arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0
-
-        var index = Math.round(this.lastIndex * Math.random())
-        if (typeof index === 'number' && !this.indexesHas(index)) {
-          return index
-        } else if (times < 3) {
-          times++
-          return this.createIndex(times)
-        } else {
-          var nowMinimumIndex = numToArr(this.length).find(function(num) {
-            return !_this4.indexesHas(num)
-          })
-          return nowMinimumIndex
-        }
-      }
-    },
-    {
-      key: 'nextIndexes',
-      value: function nextIndexes() {
-        return this.indexesExtend(this.index)
+      key: 'next',
+      value: function next() {
+        return this.extendIndexes(this.index)
       }
     },
     {
@@ -339,5 +358,5 @@ var IndexesRandom = (function(_Indexes2) {
   return IndexesRandom
 })(Indexes)
 
-export { Indexes, IndexesZero, IndexesRandom }
+export { create, Indexes, IndexesZero, IndexesRandom }
 export default index
