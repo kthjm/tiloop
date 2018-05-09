@@ -6,32 +6,43 @@
 [![Codecov](https://img.shields.io/codecov/c/github/kthjm/tiloop.svg?style=flat-square)](https://codecov.io/gh/kthjm/tiloop)
 [![cdn](https://img.shields.io/badge/jsdelivr-latest-e84d3c.svg?style=flat-square)](https://cdn.jsdelivr.net/npm/tiloop/min.js)
 
-Create iterator that have done coincident with covering all index of virtual array.
+<!-- Create iterator that have done coincident with covering all index of virtual array. -->
+
+Higher order function creates a function contains a iterator that has done coincident with covering all virtual array index.
 
 ## Installation
 ```shell
 yarn add tiloop
 ```
 
-## Usage
-### `tiloop(options)`
+## `tiloop(options)`
 ```js
 import tiloop from 'tiloop'
 
-const iterator = tiloop({
+const created = tiloop({
   length: 10000,
   maxIncrement: 30,
-  random: true,
   yielded: (indexes) => { /* result will be value */ }
 })
 
-const { value, done } = iterator.next()
+const { value, done } = created()
 ```
-#### options
-- `length`: require as `number`
-- `maxIncrement`: require as `number`
-- `yielded`: require as `function`
-- `random`: as `boolean` [default: false]
+### options
+
+#### `length: number`
+
+
+#### `maxIncrement: number`
+
+
+#### `yielded: (array) => value`
+
+
+#### `promisify: boolean`
+
+
+#### `random: boolean`
+
 
 #### Note
 `iterator` created by `tiloop` has `done` with last `value`. In other words, using result as `iterable` (not `iterator`) **will lost the last `value`** 😔.
