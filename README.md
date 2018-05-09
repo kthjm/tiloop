@@ -14,63 +14,51 @@ yarn add tiloop
 ```
 
 ## Usage
+### `tiloop(options)`
 ```js
-import tiloop, { IndexesZero } from 'tiloop'
+import tiloop from 'tiloop'
 
-const iterator = tiloop(
-  new IndexesZero({
-    length: 3000,
-    maxIncrement: 20
-  }),
-  (array) => {
-    // result will be value
-  }
-)
+const iterator = tiloop({
+  length: 10000,
+  maxIncrement: 30,
+  random: true,
+  yielded: (indexes) => { /* result will be value */ }
+})
 
 const { value, done } = iterator.next()
-
 ```
+#### options
+- `length`: require as `number`
+- `maxIncrement`: require as `number`
+- `yielded`: require as `function`
+- `random`: as `boolean` [default: false]
 
-## API
-
-### `tiloop(indexes, yielded)`
-
-`tiloop` create `iterator` that return `done` with last `value`.
-
-In other words, using result as `iterable` not `iterator` **will lost the last `value`** 😔.
+#### Note
+`iterator` created by `tiloop` has `done` with last `value`. In other words, using result as `iterable` (not `iterator`) **will lost the last `value`** 😔.
 
 ```js
 const iterator = tiloop(indexes,yielded) // done with last value
 const array = [...tiloop(indexes,yielded)] // not includes last value
 ```
 
-## Indexes
-#### `IndexesZero({ length, maxIncrement })`
-*0 to (length - 1)*
-
-#### `IndexesRandom({ length, maxIncrement })`
-*random*
-
-and able to use with custom indexes.
-
+### as modules
 ```js
-import { Indexes } from 'tiloop'
+import { create, IndexesZero, IndexesRandom } from 'tiloop'
 
-class MyIndexes extends Indexes {
-  constructor({ length, maxIncrement }) {
-    super(length, maxIncrement)
-    this.index = 0
-  }
+const iterator = create(
+  new IndexesZero({ length, maxIncrement }),
+  yielded
+)
 
-  nextIndexes() {
-    return this.indexesExtend(this.index)
-  }
-
-  prepare() {
-    this.index += 10
-  }
-}
+const randomIterator = create(
+  new IndexesRandom({ length, maxIncrement }),
+  yielded
+)
 ```
+#### `IndexesZero({ length, maxIncrement })`
+indexes increments 0 to length - 1.
+#### `IndexesRandom({ length, maxIncrement })`
+indexes increments random.
 
 ## License
 MIT (http://opensource.org/licenses/MIT)
