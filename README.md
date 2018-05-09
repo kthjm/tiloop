@@ -33,9 +33,8 @@ const { value, done } = iterator.next()
 - `yielded`: require as `function`
 - `random`: as `boolean` [default: false]
 
-`tiloop` create `iterator` that return `done` with last `value`.
-
-In other words, using result as `iterable` not `iterator` **will lost the last `value`** 😔.
+#### Note
+`iterator` created by `tiloop` has `done` with last `value`. In other words, using result as `iterable` (not `iterator`) **will lost the last `value`** 😔.
 
 ```js
 const iterator = tiloop(indexes,yielded) // done with last value
@@ -56,35 +55,10 @@ const randomIterator = create(
   yielded
 )
 ```
-
-- `create(indexes, yielded)`
-- `IndexesZero({ length, maxIncrement })`: indexes increments 0 to length - 1.
-- `IndexesRandom({ length, maxIncrement })`: indexes increments random.
-
-and able to define custom indexes.
-
-```js
-import { Indexes } from 'tiloop'
-
-class MyIndexes extends Indexes {
-  constructor(length) {
-    const maxIncrement = 10
-
-    super(length, maxIncrement)
-
-    this.maxIncrement = maxIncrement
-    this.index = 0
-  }
-
-  next() {
-    return this.extendIndexes(this.index)
-  }
-
-  prepare() {
-    this.index += this.maxIncrement
-  }
-}
-```
+#### `IndexesZero({ length, maxIncrement })`
+indexes increments 0 to length - 1.
+#### `IndexesRandom({ length, maxIncrement })`
+indexes increments random.
 
 ## License
 MIT (http://opensource.org/licenses/MIT)
