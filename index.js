@@ -1,16 +1,32 @@
 // @flow
 import regeneratorRuntime from 'regenerator-runtime'
 
-const isFnc = (data: any): boolean => typeof data === 'function'
-const isNum = (data: any): boolean => typeof data === 'number'
+type Length = number
+type Index = number
+type MaxIncrement = number
+type IndexesAdded = Array<number>
 
-const throwing = (
-  isThrow: boolean,
-  message: string,
-  isType?: boolean
-): void => {
-  if (isThrow) {
-    throw isType ? new TypeError(message) : new Error(message)
+type Argument$Sub = {
+  length: Length,
+  maxIncrement: MaxIncrement
+}
+
+type IndexesSub = {
+  nextIndexes: () => IndexesAdded,
+  done: () => boolean,
+  prepare?: () => void
+}
+
+type YieldedFn$Result = any
+type YieldedFn = (arr: IndexesAdded) => YieldedFn$Result
+type Loop$Result = Iterable<YieldedFn$Result>
+
+const isFnc = (data: any): boolean %checks => typeof data === 'function'
+const isNum = (data: any): boolean %checks => typeof data === 'number'
+
+const asserts = (condition: any, message: string) => {
+  if (!condition) {
+    throw new Error(message)
   }
 }
 
@@ -24,42 +40,42 @@ function* numToArrGenerate(num: number): Iterable<number> {
 
 const numToArr = (num: number): Array<number> => [...numToArrGenerate(num)]
 
-type Length = number
-type MaxIncrement = number
-type IndexesAdded = Array<number>
+export default  (indexes: IndexesSub, user: YieldedFn): Loop$Result => {
+  asserts(isFnc(indexes.nextIndexes), 'tiloop first argument as indexes must have method:nextIndexes')
+  asserts(isFnc(indexes.done), 'tiloop first argument as indexes must have method:done')
+  asserts(isFnc(user), 'tiloop second argument as user must be "function"')
+  return loop(indexes, user)
+}
+
+function* loop(indexes: IndexesSub, user: YieldedFn): Loop$Result {
+  while (true) {
+    const array = indexes.nextIndexes()
+
+    if (indexes.done()) {
+      return user(array)
+    } else {
+      yield user(array)
+    }
+
+    if (isFnc(indexes.prepare)) {
+      indexes.prepare()
+    }
+  }
+}
 
 export class Indexes {
   _length: Length
+  _lastIndex: Index
   _maxIncrement: MaxIncrement
   indexes: Set<number>
 
   constructor(length: Length, maxIncrement: MaxIncrement): void {
-    throwing(
-      !isNum(length),
-      'Indexes as Super class that first arg:length must be "number"',
-      true
-    )
-    throwing(
-      length <= 0,
-      'Indexes as Super class that first arg:length must be > 0'
-    )
-    throwing(
-      !isNum(maxIncrement),
-      'Indexes as Super class that second arg:maxIncrement must be "number"',
-      true
-    )
-    throwing(
-      maxIncrement <= 0,
-      'Indexes as Super class that second arg:maxIncrement must be > 0'
-    )
-
+    asserts(isNum(length) && length > 0, 'Indexes arg length must be > 0 as "number"')
+    asserts(isNum(maxIncrement) && maxIncrement > 0, 'Indexes arg maxIncrement must be > 0 as "number"')
     this._length = length
+    this._lastIndex = length - 1
     this._maxIncrement = maxIncrement
     this.indexes = new Set()
-  }
-
-  indexesAdd(index: number): void {
-    this.indexes.add(index)
   }
 
   indexesHas(index: number): boolean {
@@ -67,20 +83,16 @@ export class Indexes {
   }
 
   indexesExtend(index: number): IndexesAdded {
-    const maxIncrement = this._maxIncrement
-    const lastIndex = this._length - 1
-
-    const indexesAdded: IndexesAdded = numToArr(maxIncrement)
-      .map(i => index + i)
-      .filter(preindex => !this.indexesHas(preindex) && preindex <= lastIndex)
+    const indexesAdded =
+    numToArr(this._maxIncrement)
+    .map(i => index + i)
+    .filter(preindex => !this.indexesHas(preindex) && preindex <= this._lastIndex)
 
     // should not be but may be.
-    throwing(
-      !indexesAdded.length,
-      'indexesAdded.length === 0, but not still done'
-    )
+    asserts(indexesAdded.length, 'indexesAdded.length === 0, but not still done')
 
-    indexesAdded.forEach(index => this.indexesAdd(index))
+    indexesAdded.forEach(index => this.indexes.add(index))
+
     return indexesAdded
   }
 
@@ -89,7 +101,6 @@ export class Indexes {
   }
 }
 
-type Argument$Sub = { length: Length, maxIncrement: MaxIncrement }
 
 export class IndexesZero extends Indexes {
   index: number
@@ -130,9 +141,7 @@ export class IndexesRandom extends Indexes {
       times++
       return this.createIndex(times)
     } else {
-      const nowMinimumIndex: any = numToArr(this.length).find(
-        num => !this.indexesHas(num)
-      )
+      const nowMinimumIndex: any = numToArr(this.length).find(num => !this.indexesHas(num))
       ;(nowMinimumIndex: number)
       return nowMinimumIndex
     }
@@ -146,52 +155,3 @@ export class IndexesRandom extends Indexes {
     this.index = this.createIndex()
   }
 }
-
-type IndexesSub = {
-  nextIndexes: () => IndexesAdded,
-  done: () => boolean,
-  prepare?: () => void
-}
-
-const tiloop = (indexes: IndexesSub, user: UserFn): Loop$Result => {
-  throwing(
-    !isFnc(indexes.nextIndexes),
-    'tiloop first argument as indexes must have method:nextIndexes',
-    true
-  )
-  throwing(
-    !isFnc(indexes.done),
-    'tiloop first argument as indexes must have method:done',
-    true
-  )
-  throwing(
-    !isFnc(user),
-    'tiloop second argument as user must be "function"',
-    true
-  )
-
-  return loop(indexes, user)
-}
-
-function* loop(indexes: IndexesSub, user: UserFn): Loop$Result {
-  while (true) {
-    const array = indexes.nextIndexes()
-    const value = user(array)
-
-    if (indexes.done()) {
-      return value
-    } else {
-      yield value
-    }
-
-    if (indexes.prepare && isFnc(indexes.prepare)) {
-      indexes.prepare()
-    }
-  }
-}
-
-type UserFn = (arr: IndexesAdded) => UserFn$Result
-type UserFn$Result = any
-type Loop$Result = Iterable<UserFn$Result>
-
-export default tiloop

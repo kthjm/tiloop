@@ -85,9 +85,9 @@ var isNum = function isNum(data) {
   return typeof data === 'number'
 }
 
-var throwing = function throwing(isThrow, message, isType) {
-  if (isThrow) {
-    throw isType ? new TypeError(message) : new Error(message)
+var asserts = function asserts(condition, message) {
+  if (!condition) {
+    throw new Error(message)
   }
 }
 
@@ -129,41 +129,76 @@ var numToArr = function numToArr(num) {
   return [].concat(_toConsumableArray(numToArrGenerate(num)))
 }
 
+var index = function(indexes, user) {
+  asserts(
+    isFnc(indexes.nextIndexes),
+    'tiloop first argument as indexes must have method:nextIndexes'
+  )
+  asserts(
+    isFnc(indexes.done),
+    'tiloop first argument as indexes must have method:done'
+  )
+  asserts(isFnc(user), 'tiloop second argument as user must be "function"')
+  return loop(indexes, user)
+}
+
+function loop(indexes, user) {
+  var array
+  return regeneratorRuntime.wrap(
+    function loop$(_context2) {
+      while (1) {
+        switch ((_context2.prev = _context2.next)) {
+          case 0:
+            array = indexes.nextIndexes()
+
+            if (!indexes.done()) {
+              _context2.next = 6
+              break
+            }
+
+            return _context2.abrupt('return', user(array))
+
+          case 6:
+            _context2.next = 8
+            return user(array)
+
+          case 8:
+            if (isFnc(indexes.prepare)) {
+              indexes.prepare()
+            }
+            _context2.next = 0
+            break
+
+          case 11:
+          case 'end':
+            return _context2.stop()
+        }
+      }
+    },
+    _marked2,
+    this
+  )
+}
+
 var Indexes = (function() {
   function Indexes(length, maxIncrement) {
     _classCallCheck(this, Indexes)
 
-    throwing(
-      !isNum(length),
-      'Indexes as Super class that first arg:length must be "number"',
-      true
+    asserts(
+      isNum(length) && length > 0,
+      'Indexes arg length must be > 0 as "number"'
     )
-    throwing(
-      length <= 0,
-      'Indexes as Super class that first arg:length must be > 0'
+    asserts(
+      isNum(maxIncrement) && maxIncrement > 0,
+      'Indexes arg maxIncrement must be > 0 as "number"'
     )
-    throwing(
-      !isNum(maxIncrement),
-      'Indexes as Super class that second arg:maxIncrement must be "number"',
-      true
-    )
-    throwing(
-      maxIncrement <= 0,
-      'Indexes as Super class that second arg:maxIncrement must be > 0'
-    )
-
     this._length = length
+    this._lastIndex = length - 1
     this._maxIncrement = maxIncrement
     this.indexes = new Set()
   }
 
   _createClass(Indexes, [
-    {
-      key: 'indexesAdd',
-      value: function indexesAdd(index) {
-        this.indexes.add(index)
-      }
-    },
     {
       key: 'indexesHas',
       value: function indexesHas(index) {
@@ -175,26 +210,24 @@ var Indexes = (function() {
       value: function indexesExtend(index) {
         var _this = this
 
-        var maxIncrement = this._maxIncrement
-        var lastIndex = this._length - 1
-
-        var indexesAdded = numToArr(maxIncrement)
+        var indexesAdded = numToArr(this._maxIncrement)
           .map(function(i) {
             return index + i
           })
           .filter(function(preindex) {
-            return !_this.indexesHas(preindex) && preindex <= lastIndex
+            return !_this.indexesHas(preindex) && preindex <= _this._lastIndex
           })
 
         // should not be but may be.
-        throwing(
-          !indexesAdded.length,
+        asserts(
+          indexesAdded.length,
           'indexesAdded.length === 0, but not still done'
         )
 
         indexesAdded.forEach(function(index) {
-          return _this.indexesAdd(index)
+          return _this.indexes.add(index)
         })
+
         return indexesAdded
       }
     },
@@ -314,66 +347,7 @@ var IndexesRandom = (function(_Indexes2) {
   return IndexesRandom
 })(Indexes)
 
-var tiloop = function tiloop(indexes, user) {
-  throwing(
-    !isFnc(indexes.nextIndexes),
-    'tiloop first argument as indexes must have method:nextIndexes',
-    true
-  )
-  throwing(
-    !isFnc(indexes.done),
-    'tiloop first argument as indexes must have method:done',
-    true
-  )
-  throwing(
-    !isFnc(user),
-    'tiloop second argument as user must be "function"',
-    true
-  )
-
-  return loop(indexes, user)
-}
-
-function loop(indexes, user) {
-  var array, value
-  return regeneratorRuntime.wrap(
-    function loop$(_context2) {
-      while (1) {
-        switch ((_context2.prev = _context2.next)) {
-          case 0:
-            array = indexes.nextIndexes()
-            value = user(array)
-
-            if (!indexes.done()) {
-              _context2.next = 7
-              break
-            }
-
-            return _context2.abrupt('return', value)
-
-          case 7:
-            _context2.next = 9
-            return value
-
-          case 9:
-            if (indexes.prepare && isFnc(indexes.prepare)) {
-              indexes.prepare()
-            }
-            _context2.next = 0
-            break
-
-          case 12:
-          case 'end':
-            return _context2.stop()
-        }
-      }
-    },
-    _marked2,
-    this
-  )
-}
-
+exports['default'] = index
 exports.Indexes = Indexes
 exports.IndexesZero = IndexesZero
 exports.IndexesRandom = IndexesRandom
-exports['default'] = tiloop

@@ -14,57 +14,19 @@ describe('throws', () => {
     const tiloop = modules.default
     const f = () => {}
     const notFunctions = ['string', 10, true, undefined, null, {}, []]
-
-    notFunctions.forEach(nextIndexes =>
-      assert.throws(
-        () => tiloop({ nextIndexes }),
-        /tiloop first argument as indexes must have method:nextIndexes/
-      )
-    )
-
-    notFunctions.forEach(done =>
-      assert.throws(
-        () => tiloop({ nextIndexes: f, done }),
-        /tiloop first argument as indexes must have method:done/
-      )
-    )
-
-    notFunctions.forEach(user =>
-      assert.throws(
-        () => tiloop({ nextIndexes: f, done: f }, user),
-        /tiloop second argument as user must be/
-      )
-    )
+    notFunctions.forEach(nextIndexes => assert.throws(() => tiloop({ nextIndexes })))
+    notFunctions.forEach(done => assert.throws(() => tiloop({ nextIndexes: f, done })))
+    notFunctions.forEach(user => assert.throws(() => tiloop({ nextIndexes: f, done: f }, user)))
   })
 
   it('Indexes', () => {
     const Indexes = modules.Indexes
     const n = 10
     const notNumbers = ['string', true, undefined, null, {}, [], () => {}]
-
-    notNumbers.forEach(length =>
-      assert.throws(
-        () => new Indexes(length, n),
-        /Indexes as Super class that first arg:length must be "number"/
-      )
-    )
-
-    assert.throws(
-      () => new Indexes(0, n),
-      /Indexes as Super class that first arg:length must be > 0/
-    )
-
-    notNumbers.forEach(maxIncrement =>
-      assert.throws(
-        () => new Indexes(n, maxIncrement),
-        /Indexes as Super class that second arg:maxIncrement must be "number"/
-      )
-    )
-
-    assert.throws(
-      () => new Indexes(n, 0),
-      /Indexes as Super class that second arg:maxIncrement must be > 0/
-    )
+    notNumbers.forEach(length => assert.throws(() => new Indexes(length, n)))
+    assert.throws(() => new Indexes(0, n))
+    notNumbers.forEach(maxIncrement => assert.throws(() => new Indexes(n, maxIncrement)))
+    assert.throws(() => new Indexes(n, 0))
   })
 })
 
