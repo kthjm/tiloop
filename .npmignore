@@ -3,6 +3,7 @@ flow-typed/
 .flowconfig
 .gitignore
 .travis.yml
+codecov.yml
 index.js
 rollup.config.js
 test.js
