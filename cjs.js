@@ -8,13 +8,7 @@ function _interopDefault(ex) {
 
 var regeneratorRuntime = _interopDefault(require('regenerator-runtime'))
 
-var classCallCheck = function(instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError('Cannot call a class as a function')
-  }
-}
-
-var createClass = (function() {
+var _createClass = (function() {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i]
@@ -24,7 +18,6 @@ var createClass = (function() {
       Object.defineProperty(target, descriptor.key, descriptor)
     }
   }
-
   return function(Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps)
     if (staticProps) defineProperties(Constructor, staticProps)
@@ -32,14 +25,24 @@ var createClass = (function() {
   }
 })()
 
-var inherits = function(subClass, superClass) {
+function _possibleConstructorReturn(self, call) {
+  if (!self) {
+    throw new ReferenceError(
+      "this hasn't been initialised - super() hasn't been called"
+    )
+  }
+  return call && (typeof call === 'object' || typeof call === 'function')
+    ? call
+    : self
+}
+
+function _inherits(subClass, superClass) {
   if (typeof superClass !== 'function' && superClass !== null) {
     throw new TypeError(
       'Super expression must either be null or a function, not ' +
         typeof superClass
     )
   }
-
   subClass.prototype = Object.create(superClass && superClass.prototype, {
     constructor: {
       value: subClass,
@@ -54,23 +57,17 @@ var inherits = function(subClass, superClass) {
       : (subClass.__proto__ = superClass)
 }
 
-var possibleConstructorReturn = function(self, call) {
-  if (!self) {
-    throw new ReferenceError(
-      "this hasn't been initialised - super() hasn't been called"
-    )
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError('Cannot call a class as a function')
   }
-
-  return call && (typeof call === 'object' || typeof call === 'function')
-    ? call
-    : self
 }
 
-var toConsumableArray = function(arr) {
+function _toConsumableArray(arr) {
   if (Array.isArray(arr)) {
-    for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++)
+    for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
       arr2[i] = arr[i]
-
+    }
     return arr2
   } else {
     return Array.from(arr)
@@ -129,12 +126,12 @@ function numToArrGenerate(num) {
 }
 
 var numToArr = function numToArr(num) {
-  return [].concat(toConsumableArray(numToArrGenerate(num)))
+  return [].concat(_toConsumableArray(numToArrGenerate(num)))
 }
 
 var Indexes = (function() {
   function Indexes(length, maxIncrement) {
-    classCallCheck(this, Indexes)
+    _classCallCheck(this, Indexes)
 
     throwing(
       !isNum(length),
@@ -160,7 +157,7 @@ var Indexes = (function() {
     this.indexes = new Set()
   }
 
-  createClass(Indexes, [
+  _createClass(Indexes, [
     {
       key: 'indexesAdd',
       value: function indexesAdd(index) {
@@ -208,18 +205,20 @@ var Indexes = (function() {
       }
     }
   ])
+
   return Indexes
 })()
 
 var IndexesZero = (function(_Indexes) {
-  inherits(IndexesZero, _Indexes)
+  _inherits(IndexesZero, _Indexes)
 
   function IndexesZero(_ref) {
     var length = _ref.length,
       maxIncrement = _ref.maxIncrement
-    classCallCheck(this, IndexesZero)
 
-    var _this2 = possibleConstructorReturn(
+    _classCallCheck(this, IndexesZero)
+
+    var _this2 = _possibleConstructorReturn(
       this,
       (IndexesZero.__proto__ || Object.getPrototypeOf(IndexesZero)).call(
         this,
@@ -233,7 +232,7 @@ var IndexesZero = (function(_Indexes) {
     return _this2
   }
 
-  createClass(IndexesZero, [
+  _createClass(IndexesZero, [
     {
       key: 'nextIndexes',
       value: function nextIndexes() {
@@ -247,18 +246,20 @@ var IndexesZero = (function(_Indexes) {
       }
     }
   ])
+
   return IndexesZero
 })(Indexes)
 
 var IndexesRandom = (function(_Indexes2) {
-  inherits(IndexesRandom, _Indexes2)
+  _inherits(IndexesRandom, _Indexes2)
 
   function IndexesRandom(_ref2) {
     var length = _ref2.length,
       maxIncrement = _ref2.maxIncrement
-    classCallCheck(this, IndexesRandom)
 
-    var _this3 = possibleConstructorReturn(
+    _classCallCheck(this, IndexesRandom)
+
+    var _this3 = _possibleConstructorReturn(
       this,
       (IndexesRandom.__proto__ || Object.getPrototypeOf(IndexesRandom)).call(
         this,
@@ -273,7 +274,7 @@ var IndexesRandom = (function(_Indexes2) {
     return _this3
   }
 
-  createClass(IndexesRandom, [
+  _createClass(IndexesRandom, [
     {
       key: 'createIndex',
       value: function createIndex() {
@@ -309,6 +310,7 @@ var IndexesRandom = (function(_Indexes2) {
       }
     }
   ])
+
   return IndexesRandom
 })(Indexes)
 
