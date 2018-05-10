@@ -7,20 +7,6 @@ it('numToArr', () => {
   assert.deepEqual(numToArr(3), [0, 1, 2])
 })
 
-describe('tiloop', () => {
-  const modules = rewire('./index.js')
-  const { create } = modules
-  const tiloop = modules.default
-
-  const test = (random, expectConstructor) => () => {
-    const loop = ({ constructor }) => assert.equal(constructor, expectConstructor)
-    modules.__with__({ loop })(() => tiloop({ random, length: 5000, maxIncrement: 20, yielded: () => {} }))
-  }
-
-  it('!random', test(false, modules.IndexesZero))
-  it('random', test(true, modules.IndexesRandom))
-})
-
 describe('indexes.indexes.size === length', () => {
   const modules = rewire('./index.js')
   const { create } = modules
@@ -36,6 +22,87 @@ describe('indexes.indexes.size === length', () => {
 
   it('IndexesZero', test(modules.IndexesZero))
   it('IndexesRandom', test(modules.IndexesRandom))
+})
+
+describe('tiloop', () => {
+  const modules = rewire('./index.js')
+  const tiloop = modules.default
+
+  // common options
+  const length = 1000
+  const maxIncrement = 20
+
+  describe('{ random }', () => {
+    const test = (random, expectConstructor) => () => {
+      const yielded = () => {}
+      const loop = ({ constructor }) => assert.equal(constructor, expectConstructor)
+      modules.__with__({ loop })(() => tiloop({ random, length, maxIncrement, yielded }))
+    }
+
+    it('false', test(false, modules.IndexesZero))
+    it('true', test(true, modules.IndexesRandom))
+  })
+
+  describe('{ promisify }', () => {
+    const value = 'value'
+
+    it('false', () => {
+      const yielded = () => value
+
+      const fn = tiloop({ promisify: false, length, maxIncrement, yielded })
+      const result = fn()
+
+      assert.ok(typeof result.done === 'boolean')
+      assert.ok(result.value, value)
+    })
+
+    it('true', () => {
+      const yielded = () => new Promise(resolve => setTimeout(() => resolve(value), 500))
+
+      const afn = tiloop({ promisify: true, length, maxIncrement, yielded })
+      const promise = afn()
+      assert.equal(promise.constructor, Promise)
+
+      return promise.then(result => {
+        assert.ok(typeof result.done === 'boolean')
+        assert.ok(result.value, value)
+      })
+    })
+  })
+
+  describe('run till done', () => {
+    const recursiveTillDone = (iterate) =>
+      Promise.resolve(iterate()).then(({ done }) =>
+        !done &&
+        recursiveTillDone(iterate)
+      )
+
+    const test = ({ random, promisify } = {}) => () => {
+      const set = new Set()
+      const addIndexes = (indexes) => indexes.forEach(index => set.add(index))
+
+      const yielded = !promisify
+      ? (indexes) => addIndexes(indexes)
+      : (indexes) => new Promise(resolve =>
+        setTimeout(
+          () => resolve(addIndexes(indexes)),
+          10
+        )
+      )
+
+      const iterate = tiloop({ length, maxIncrement, yielded, random, promisify })
+
+      return recursiveTillDone(iterate).then(() =>
+        assert.equal(set.size, length)
+      )
+    }
+
+    it('{}', test())
+    it('{ random }', test({ random: true }))
+    it('{ promisify }', test({ promisify: true }))
+    it('{ random, promisify }', test({ random: true, promisify: true }))
+  })
+
 })
 
 describe('throws', () => {

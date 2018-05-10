@@ -55,9 +55,6 @@ function _classCallCheck(instance, Constructor) {
   }
 }
 
-var _marked = /*#__PURE__*/ regeneratorRuntime.mark(numToArrGenerate)
-var _marked2 = /*#__PURE__*/ regeneratorRuntime.mark(loop)
-
 function _toConsumableArray(arr) {
   if (Array.isArray(arr)) {
     for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
@@ -69,7 +66,13 @@ function _toConsumableArray(arr) {
   }
 }
 
+var _marked = /*#__PURE__*/ regeneratorRuntime.mark(numToArrGenerate)
+var _marked2 = /*#__PURE__*/ regeneratorRuntime.mark(loop)
+
 //
+/* types */
+
+/* util */
 var isFnc = function isFnc(data) {
   return typeof data === 'function'
 }
@@ -82,10 +85,6 @@ var throws = function throws(message) {
 }
 var asserts = function asserts(condition, message) {
   return !condition && throws(message)
-}
-
-var numToArr = function numToArr(num) {
-  return [].concat(_toConsumableArray(numToArrGenerate(num)))
 }
 
 function numToArrGenerate(num) {
@@ -122,74 +121,11 @@ function numToArrGenerate(num) {
   )
 }
 
-var index = function() {
-  var _ref =
-      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-    length = _ref.length,
-    maxIncrement = _ref.maxIncrement,
-    yielded = _ref.yielded,
-    random = _ref.random
-
-  return create(
-    random
-      ? new IndexesRandom({ length: length, maxIncrement: maxIncrement })
-      : new IndexesZero({ length: length, maxIncrement: maxIncrement }),
-    yielded
-  )
+var numToArr = function numToArr(num) {
+  return [].concat(_toConsumableArray(numToArrGenerate(num)))
 }
 
-var create = function create(indexes, yielded) {
-  asserts(
-    isFnc(indexes.next),
-    'tiloop first argument as indexes must have method:next'
-  )
-  asserts(
-    isFnc(indexes.done),
-    'tiloop first argument as indexes must have method:done'
-  )
-  asserts(
-    isFnc(yielded),
-    'tiloop second argument as yielded must be "function"'
-  )
-  return loop(indexes, yielded)
-}
-
-function loop(indexes, yielded) {
-  var array
-  return regeneratorRuntime.wrap(
-    function loop$(_context2) {
-      while (1) {
-        switch ((_context2.prev = _context2.next)) {
-          case 0:
-            array = indexes.next()
-
-            if (!indexes.done()) {
-              _context2.next = 6
-              break
-            }
-
-            return _context2.abrupt('return', yielded(array))
-
-          case 6:
-            _context2.next = 8
-            return yielded(array)
-
-          case 8:
-            if (isFnc(indexes.prepare)) indexes.prepare()
-            _context2.next = 0
-            break
-
-          case 11:
-          case 'end':
-            return _context2.stop()
-        }
-      }
-    },
-    _marked2,
-    this
-  )
-}
-
+/* Indexes classes */
 var Indexes = (function() {
   function Indexes(length, maxIncrement) {
     _classCallCheck(this, Indexes)
@@ -255,9 +191,9 @@ var Indexes = (function() {
 var IndexesZero = (function(_Indexes) {
   _inherits(IndexesZero, _Indexes)
 
-  function IndexesZero(_ref2) {
-    var length = _ref2.length,
-      maxIncrement = _ref2.maxIncrement
+  function IndexesZero(_ref) {
+    var length = _ref.length,
+      maxIncrement = _ref.maxIncrement
 
     _classCallCheck(this, IndexesZero)
 
@@ -319,9 +255,9 @@ var IndexesRandom = (function(_Indexes2) {
     }
   ])
 
-  function IndexesRandom(_ref3) {
-    var length = _ref3.length,
-      maxIncrement = _ref3.maxIncrement
+  function IndexesRandom(_ref2) {
+    var length = _ref2.length,
+      maxIncrement = _ref2.maxIncrement
 
     _classCallCheck(this, IndexesRandom)
 
@@ -358,5 +294,97 @@ var IndexesRandom = (function(_Indexes2) {
   return IndexesRandom
 })(Indexes)
 
-export { create, Indexes, IndexesZero, IndexesRandom }
-export default index
+/* cores */
+function loop(indexes, yielded) {
+  var array
+  return regeneratorRuntime.wrap(
+    function loop$(_context2) {
+      while (1) {
+        switch ((_context2.prev = _context2.next)) {
+          case 0:
+            array = indexes.next()
+
+            if (!indexes.done()) {
+              _context2.next = 6
+              break
+            }
+
+            return _context2.abrupt('return', yielded(array))
+
+          case 6:
+            _context2.next = 8
+            return yielded(array)
+
+          case 8:
+            if (isFnc(indexes.prepare)) {
+              indexes.prepare()
+            }
+            _context2.next = 0
+            break
+
+          case 11:
+          case 'end':
+            return _context2.stop()
+        }
+      }
+    },
+    _marked2,
+    this
+  )
+}
+
+var create = function create(indexes, yielded) {
+  asserts(
+    isFnc(indexes.next),
+    'tiloop first argument as indexes must have method:next'
+  )
+  asserts(
+    isFnc(indexes.done),
+    'tiloop first argument as indexes must have method:done'
+  )
+  asserts(
+    isFnc(yielded),
+    'tiloop second argument as yielded must be "function"'
+  )
+  return loop(indexes, yielded)
+}
+
+var i2f = function i2f(iterator, promisify) {
+  return !promisify ? i2fn(iterator) : i2afn(iterator)
+}
+
+var i2fn = function i2fn(iterator) {
+  return function() {
+    return iterator.next()
+  }
+}
+
+var i2afn = function i2afn(iterator) {
+  return function() {
+    var _iterator$next = iterator.next(),
+      promise = _iterator$next.value,
+      done = _iterator$next.done
+
+    return Promise.resolve(promise).then(function(value) {
+      return { value: value, done: done }
+    })
+  }
+}
+
+var tiloop = function tiloop() {
+  var _ref3 =
+      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+    length = _ref3.length,
+    maxIncrement = _ref3.maxIncrement,
+    yielded = _ref3.yielded,
+    promisify = _ref3.promisify,
+    random = _ref3.random
+
+  var Indexes = random ? IndexesRandom : IndexesZero
+  var indexes = new Indexes({ length: length, maxIncrement: maxIncrement })
+  var iterator = create(indexes, yielded)
+  return i2f(iterator, promisify)
+}
+
+export { Indexes, IndexesZero, IndexesRandom, create, i2f }
+export default tiloop

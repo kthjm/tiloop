@@ -6,10 +6,7 @@
         "flow",
         "power-assert"
       ],
-      "plugins": [
-        "istanbul",
-        "rewire"
-      ]
+      "plugins": ["istanbul"]
     },
     "BUILD": {
       "presets": [["env", { "targets": { "browsers": "last 2 versions" }, "modules": false }]]
