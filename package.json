@@ -7,7 +7,7 @@
   "main": "cjs.js",
   "module": "es.js",
   "jsnext:main": "es.js",
-  "description": "Creates a function contains a iterator that has done coincident with covering all virtual array index.",
+  "description": "Creates a function contains a iterator that yield last value coincident with done.",
   "keywords": [
     "iterator",
     "iterable",
