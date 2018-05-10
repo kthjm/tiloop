@@ -6,8 +6,6 @@
 [![Codecov](https://img.shields.io/codecov/c/github/kthjm/tiloop.svg?style=flat-square)](https://codecov.io/gh/kthjm/tiloop)
 [![cdn](https://img.shields.io/badge/jsdelivr-latest-e84d3c.svg?style=flat-square)](https://cdn.jsdelivr.net/npm/tiloop/min.js)
 
-<!-- Create iterator that have done coincident with covering all index of virtual array. -->
-
 Higher order function creates a function contains a iterator that has done coincident with covering all virtual array index.
 
 ## Installation
@@ -15,61 +13,57 @@ Higher order function creates a function contains a iterator that has done coinc
 yarn add tiloop
 ```
 
-## `tiloop(options)`
+## Usage
+
+### `tiloop(config)`
 ```js
 import tiloop from 'tiloop'
 
-const created = tiloop({
+const fn = tiloop({
   length: 10000,
   maxIncrement: 30,
   yielded: (indexes) => { /* result will be value */ }
 })
 
-const { value, done } = created()
+const { value, done } = fn()
 ```
-### options
+#### config
 
-#### `length: number`
+##### `length: number`
+Used for determine virtual-array length. (required)
 
+##### `maxIncrement: number`
+Used for determine increment in every `yield`. (required)
 
-#### `maxIncrement: number`
+##### `yielded: (array) => value`
+Used for `yield`. (required)
 
+##### `promisify: boolean`
+Whether `Promise.resolve()` to `value`. [default: `false`]
 
-#### `yielded: (array) => value`
+##### `random: boolean`
+Whether increment indexes by random. [default: `false`]
 
+### modules
+```js
+import { create, IndexesZero, i2f } from 'tiloop'
 
-#### `promisify: boolean`
-
-
-#### `random: boolean`
-
+const indexes = new IndexesZero({ length, maxIncrement })
+const iterator = create(indexes, (array) => {})
+const afn = i2f(iterator, true)
+```
+- `create(indexes, yielded)` create iterator.
+- `IndexesZero({ length, maxIncrement })` indexes increments 0 to length - 1.
+- `IndexesRandom({ length, maxIncrement })` indexes increments random.
+- `i2f(iterator[, promisify])` iterator to function.
 
 #### Note
-`iterator` created by `tiloop` has `done` with last `value`. In other words, using result as `iterable` (not `iterator`) **will lost the last `value`** 😔.
+`iterator` made by `create` has done with last `value`. In other words, using result as `iterable` (not `iterator`) **will lost the last `value`** 😔.
 
 ```js
-const iterator = tiloop(indexes,yielded) // done with last value
-const array = [...tiloop(indexes,yielded)] // not includes last value
+const iterator = create(indexes,yielded) // done with last value
+const array = [...create(indexes,yielded)] // not includes last value
 ```
-
-### as modules
-```js
-import { create, IndexesZero, IndexesRandom } from 'tiloop'
-
-const iterator = create(
-  new IndexesZero({ length, maxIncrement }),
-  yielded
-)
-
-const randomIterator = create(
-  new IndexesRandom({ length, maxIncrement }),
-  yielded
-)
-```
-#### `IndexesZero({ length, maxIncrement })`
-indexes increments 0 to length - 1.
-#### `IndexesRandom({ length, maxIncrement })`
-indexes increments random.
 
 ## License
 MIT (http://opensource.org/licenses/MIT)
