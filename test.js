@@ -9,16 +9,48 @@ it('numToArr', () => {
 
 describe('tiloop', () => {
   const modules = rewire('./index.js')
-  const { create } = modules
   const tiloop = modules.default
 
-  const test = (random, expectConstructor) => () => {
-    const loop = ({ constructor }) => assert.equal(constructor, expectConstructor)
-    modules.__with__({ loop })(() => tiloop({ random, length: 5000, maxIncrement: 20, yielded: () => {} }))
-  }
+  describe('{ random }', () => {
+    
+    const test = (random, expectConstructor) => () => {
+      const length = 5000, maxIncrement = 20, yielded = () => {}
+      const loop = ({ constructor }) => assert.equal(constructor, expectConstructor)
+      modules.__with__({ loop })(() => tiloop({ random, length, maxIncrement, yielded }))
+    }
 
-  it('!random', test(false, modules.IndexesZero))
-  it('random', test(true, modules.IndexesRandom))
+    it('false', test(false, modules.IndexesZero))
+    it('true', test(true, modules.IndexesRandom))
+  })
+
+  describe('{ promisify }', () => {
+    const value = 'value'
+    const length = 5000, maxIncrement = 20
+
+    it('false', () => {
+      const yielded = () => value
+
+      const fn = tiloop({ promisify: false, length, maxIncrement, yielded })
+      const result = fn()
+
+      assert.ok(typeof result.done === 'boolean')
+      assert.ok(result.value, value)
+    })
+
+    it('true', () => {
+      const yielded = () => new Promise(resolve => setTimeout(() => resolve(value), 500))
+
+      const afn = tiloop({ promisify: true, length, maxIncrement, yielded })
+      const promise = afn()
+      assert.equal(promise.constructor, Promise)
+
+      return promise.then(result => {
+        assert.ok(typeof result.done === 'boolean')
+        assert.ok(result.value, value)
+      })
+    })
+  })
+
 })
 
 describe('indexes.indexes.size === length', () => {

@@ -1,25 +1,19 @@
 // @flow
 import regeneratorRuntime from 'regenerator-runtime'
+import {
+  type TiloopFn,
+  type CreateFn,
+  type I2FFn$ResultFn,
+  type I2FFn$ResultFnP,
+  type I2FFn,
+  type Length,
+  type Index,
+  type MaxIncrement,
+  type IndexesAdded,
+  type IndexesSub$Config
+} from './types.js'
 
-type Length = number
-type Index = number
-type MaxIncrement = number
-type IndexesAdded = Array<number>
-
-type YieldedFn$Result = any
-type YieldedFn = (arr: IndexesAdded) => YieldedFn$Result
-type Loop$Result = Iterable<YieldedFn$Result>
-
-interface IndexesSub {
-  next(): IndexesAdded;
-  done(): boolean;
-  prepare(): void;
-}
-
-type IndexesSub$Arg = {
-  length: Length,
-  maxIncrement: MaxIncrement
-}
+/* util */
 
 const isFnc = (data: any): boolean %checks => typeof data === 'function'
 const isNum = (data: any): boolean %checks => typeof data === 'number'
@@ -37,49 +31,13 @@ function* numToArrGenerate(num: number): Iterable<number> {
   }
 }
 
-export default ({
-  length,
-  maxIncrement,
-  yielded,
-  random
-}: {
-  length: Length,
-  maxIncrement: MaxIncrement,
-  yielded: YieldedFn,
-  random?: boolean
-} = {}) => create(
-  random
-  ? new IndexesRandom({ length, maxIncrement })
-  : new IndexesZero({ length, maxIncrement }),
-  yielded
-)
-
-export const create = (indexes: IndexesSub, yielded: YieldedFn): Loop$Result => {
-  asserts(isFnc(indexes.next), 'tiloop first argument as indexes must have method:next')
-  asserts(isFnc(indexes.done), 'tiloop first argument as indexes must have method:done')
-  asserts(isFnc(yielded), 'tiloop second argument as yielded must be "function"')
-  return loop(indexes, yielded)
-}
-
-function* loop(indexes: IndexesSub, yielded: YieldedFn): Loop$Result {
-  while (true) {
-    const array = indexes.next()
-
-    if (indexes.done()) {
-      return yielded(array)
-    } else {
-      yield yielded(array)
-    }
-
-    if (isFnc(indexes.prepare)) indexes.prepare()
-  }
-}
+/* Indexes classes */
 
 export class Indexes {
   _length: Length
   _lastIndex: Index
   _maxIncrement: MaxIncrement
-  indexes: Set<number>
+  indexes: Set<Index>
 
   constructor(length: Length, maxIncrement: MaxIncrement): void {
     asserts(isNum(length) && length > 0, 'Indexes arg length must be > 0 as "number"')
@@ -116,12 +74,11 @@ export class Indexes {
   }
 }
 
-
 export class IndexesZero extends Indexes {
-  maxIncrement: number
-  index: number
+  maxIncrement: MaxIncrement
+  index: Index
 
-  constructor({ length, maxIncrement }: IndexesSub$Arg): void {
+  constructor({ length, maxIncrement }: IndexesSub$Config): void {
     super(length, maxIncrement)
     this.maxIncrement = maxIncrement
     this.index = 0
@@ -137,9 +94,9 @@ export class IndexesZero extends Indexes {
 }
 
 export class IndexesRandom extends Indexes {
-  length: number
-  lastIndex: number
-  index: number
+  length: Length
+  lastIndex: Index
+  index: Index
 
   createIndex(times: number = 0): Index {
     const index = Math.round(this.lastIndex * Math.random())
@@ -153,7 +110,7 @@ export class IndexesRandom extends Indexes {
     return findedIndex
   }
 
-  constructor({ length, maxIncrement }: IndexesSub$Arg): void {
+  constructor({ length, maxIncrement }: IndexesSub$Config): void {
     super(length, maxIncrement)
     this.length = length
     this.lastIndex = length - 1
@@ -168,3 +125,47 @@ export class IndexesRandom extends Indexes {
     this.index = this.createIndex()
   }
 }
+
+/* cores */
+
+function* loop(indexes, yielded) {
+  while (true) {
+    const array = indexes.next()
+    if (indexes.done()) {
+      return yielded(array)
+    } else {
+      yield yielded(array)
+    }
+    if (isFnc(indexes.prepare)) indexes.prepare()
+  }
+}
+
+export const create: CreateFn = (indexes, yielded) => {
+  asserts(isFnc(indexes.next), 'tiloop first argument as indexes must have method:next')
+  asserts(isFnc(indexes.done), 'tiloop first argument as indexes must have method:done')
+  asserts(isFnc(yielded), 'tiloop second argument as yielded must be "function"')
+  return loop(indexes, yielded)
+}
+
+export const i2f: I2FFn = (iterator, promisify) => {
+  let result: any
+  if (!promisify) {
+    const resultFn: I2FFn$ResultFn = () => iterator.next()
+    result = resultFn
+  } else {
+    const resultFnP: I2FFn$ResultFnP = () => {
+      const { value: promise, done } = iterator.next()
+      return Promise.resolve(promise).then(value => ({ value, done }))
+    }
+    result = resultFnP
+  }
+  return result
+}
+
+const tiloop: TiloopFn = ({ length, maxIncrement, yielded, promisify, random } = {}) => {
+  const Indexes = random ? IndexesRandom : IndexesZero
+  const iterator = create(new Indexes({ length, maxIncrement }), yielded)
+  return i2f(iterator, promisify)
+}
+
+export default tiloop
