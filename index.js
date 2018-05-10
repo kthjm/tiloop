@@ -1,27 +1,47 @@
 // @flow
 import regeneratorRuntime from 'regenerator-runtime'
-import {
-  type TiloopFn,
-  type CreateFn,
-  type I2FFn$ResultFn,
-  type I2FFn$ResultFnP,
-  type I2FFn,
-  type Length,
-  type Index,
-  type MaxIncrement,
-  type IndexesAdded,
-  type IndexesSub$Config
-} from './types.js'
+
+/* types */
+type Length = number
+type Index = number
+type MaxIncrement = number
+type IndexesAdded = Array<number>
+type IndexesSub$Config = { length: Length, maxIncrement: MaxIncrement }
+
+type TiloopFn$Config = {
+  length: Length,
+  maxIncrement: MaxIncrement,
+  yielded: YieldedFn,
+  promisify?: boolean,
+  random?: boolean
+}
+
+type YieldedFn$Result = any
+type YieldedFn = (arr: IndexesAdded) => YieldedFn$Result
+
+type TiloopFn = (config: TiloopFn$Config) => I2FFn$Result
+
+type I2FFn$Result = I2FFn$ResultFn | I2FFn$ResultAfn
+type I2FFn$ResultFn = () => I2FFn$ResultFn$Result
+type I2FFn$ResultAfn = () => Promise<I2FFn$ResultFn$Result>
+type I2FFn$ResultFn$Result = IteratorResult<YieldedFn$Result, YieldedFn$Result> | { done: boolean, value: YieldedFn$Result }
+
+interface IndexesSub {
+  next(): IndexesAdded;
+  done(): boolean;
+  prepare(): void;
+}
+
+type CreateFn = (indexes: IndexesSub, yielded: YieldedFn) => CreateFn$Result
+type CreateFn$Result = Iterator<YieldedFn$Result>
+type I2FFn = (iterator: CreateFn$Result, promisify?: boolean) => I2FFn$Result
 
 /* util */
-
 const isFnc = (data: any): boolean %checks => typeof data === 'function'
 const isNum = (data: any): boolean %checks => typeof data === 'number'
 
 const throws = (message) => { throw new Error(message) }
 const asserts = (condition: any, message: string) => !condition && throws(message)
-
-const numToArr = (num: number): Array<number> => [...numToArrGenerate(num)]
 
 function* numToArrGenerate(num: number): Iterable<number> {
   let from = 0
@@ -31,8 +51,9 @@ function* numToArrGenerate(num: number): Iterable<number> {
   }
 }
 
-/* Indexes classes */
+const numToArr = (num: number): Array<number> => [...numToArrGenerate(num)]
 
+/* Indexes classes */
 export class Indexes {
   _length: Length
   _lastIndex: Index
@@ -127,16 +148,19 @@ export class IndexesRandom extends Indexes {
 }
 
 /* cores */
-
 function* loop(indexes, yielded) {
   while (true) {
     const array = indexes.next()
+
     if (indexes.done()) {
       return yielded(array)
     } else {
       yield yielded(array)
     }
-    if (isFnc(indexes.prepare)) indexes.prepare()
+
+    if (isFnc(indexes.prepare)){
+      indexes.prepare()
+    }
   }
 }
 
@@ -147,24 +171,23 @@ export const create: CreateFn = (indexes, yielded) => {
   return loop(indexes, yielded)
 }
 
-export const i2f: I2FFn = (iterator, promisify) => {
-  let result: any
-  if (!promisify) {
-    const resultFn: I2FFn$ResultFn = () => iterator.next()
-    result = resultFn
-  } else {
-    const resultFnP: I2FFn$ResultFnP = () => {
-      const { value: promise, done } = iterator.next()
-      return Promise.resolve(promise).then(value => ({ value, done }))
-    }
-    result = resultFnP
+export const i2f: I2FFn = (iterator, promisify) => !promisify ? i2fn(iterator) : i2afn(iterator)
+
+const i2fn = (iterator): I2FFn$ResultFn =>
+  () => {
+    return iterator.next()
   }
-  return result
-}
+
+const i2afn = (iterator): I2FFn$ResultAfn =>
+  () => {
+    const { value: promise, done } = iterator.next()
+    return Promise.resolve(promise).then(value => ({ value, done }))
+  }
 
 const tiloop: TiloopFn = ({ length, maxIncrement, yielded, promisify, random } = {}) => {
   const Indexes = random ? IndexesRandom : IndexesZero
-  const iterator = create(new Indexes({ length, maxIncrement }), yielded)
+  const indexes = new Indexes({ length, maxIncrement })
+  const iterator = create(indexes, yielded)
   return i2f(iterator, promisify)
 }
 

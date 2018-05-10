@@ -7,5 +7,4 @@ codecov.yml
 index.js
 rollup.config.js
 test.js
-types.js
 yarn.lock

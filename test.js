@@ -7,14 +7,34 @@ it('numToArr', () => {
   assert.deepEqual(numToArr(3), [0, 1, 2])
 })
 
+describe('indexes.indexes.size === length', () => {
+  const modules = rewire('./index.js')
+  const { create } = modules
+  const yielded = array => assert.ok(Array.isArray(array))
+  const justToArray = (indexes) => [...create(indexes, yielded)]
+
+  const test = (Indexes) => () => {
+    const length = 5000
+    const indexes = new Indexes({ length, maxIncrement: 3 })
+    justToArray(indexes)
+    assert.ok(indexes.indexes.size === length)
+  }
+
+  it('IndexesZero', test(modules.IndexesZero))
+  it('IndexesRandom', test(modules.IndexesRandom))
+})
+
 describe('tiloop', () => {
   const modules = rewire('./index.js')
   const tiloop = modules.default
 
+  // common options
+  const length = 1000
+  const maxIncrement = 20
+
   describe('{ random }', () => {
-    
     const test = (random, expectConstructor) => () => {
-      const length = 5000, maxIncrement = 20, yielded = () => {}
+      const yielded = () => {}
       const loop = ({ constructor }) => assert.equal(constructor, expectConstructor)
       modules.__with__({ loop })(() => tiloop({ random, length, maxIncrement, yielded }))
     }
@@ -25,7 +45,6 @@ describe('tiloop', () => {
 
   describe('{ promisify }', () => {
     const value = 'value'
-    const length = 5000, maxIncrement = 20
 
     it('false', () => {
       const yielded = () => value
@@ -51,23 +70,39 @@ describe('tiloop', () => {
     })
   })
 
-})
+  describe('run till done', () => {
+    const recursiveTillDone = (iterate) =>
+      Promise.resolve(iterate()).then(({ done }) =>
+        !done &&
+        recursiveTillDone(iterate)
+      )
 
-describe('indexes.indexes.size === length', () => {
-  const modules = rewire('./index.js')
-  const { create } = modules
-  const yielded = array => assert.ok(Array.isArray(array))
-  const justToArray = (indexes) => [...create(indexes, yielded)]
+    const test = ({ random, promisify } = {}) => () => {
+      const set = new Set()
+      const addIndexes = (indexes) => indexes.forEach(index => set.add(index))
 
-  const test = (Indexes) => () => {
-    const length = 5000
-    const indexes = new Indexes({ length, maxIncrement: 3 })
-    justToArray(indexes)
-    assert.ok(indexes.indexes.size === length)
-  }
+      const yielded = !promisify
+      ? (indexes) => addIndexes(indexes)
+      : (indexes) => new Promise(resolve =>
+        setTimeout(
+          () => resolve(addIndexes(indexes)),
+          10
+        )
+      )
 
-  it('IndexesZero', test(modules.IndexesZero))
-  it('IndexesRandom', test(modules.IndexesRandom))
+      const iterate = tiloop({ length, maxIncrement, yielded, random, promisify })
+
+      return recursiveTillDone(iterate).then(() =>
+        assert.equal(set.size, length)
+      )
+    }
+
+    it('{}', test())
+    it('{ random }', test({ random: true }))
+    it('{ promisify }', test({ promisify: true }))
+    it('{ random, promisify }', test({ random: true, promisify: true }))
+  })
+
 })
 
 describe('throws', () => {

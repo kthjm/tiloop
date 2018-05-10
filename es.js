@@ -1,7 +1,5 @@
 import regeneratorRuntime from 'regenerator-runtime'
 
-//
-
 var _createClass = (function() {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
@@ -57,9 +55,6 @@ function _classCallCheck(instance, Constructor) {
   }
 }
 
-var _marked = /*#__PURE__*/ regeneratorRuntime.mark(numToArrGenerate)
-var _marked2 = /*#__PURE__*/ regeneratorRuntime.mark(loop)
-
 function _toConsumableArray(arr) {
   if (Array.isArray(arr)) {
     for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
@@ -71,9 +66,13 @@ function _toConsumableArray(arr) {
   }
 }
 
-//
-/* util */
+var _marked = /*#__PURE__*/ regeneratorRuntime.mark(numToArrGenerate)
+var _marked2 = /*#__PURE__*/ regeneratorRuntime.mark(loop)
 
+//
+/* types */
+
+/* util */
 var isFnc = function isFnc(data) {
   return typeof data === 'function'
 }
@@ -86,10 +85,6 @@ var throws = function throws(message) {
 }
 var asserts = function asserts(condition, message) {
   return !condition && throws(message)
-}
-
-var numToArr = function numToArr(num) {
-  return [].concat(_toConsumableArray(numToArrGenerate(num)))
 }
 
 function numToArrGenerate(num) {
@@ -126,8 +121,11 @@ function numToArrGenerate(num) {
   )
 }
 
-/* Indexes classes */
+var numToArr = function numToArr(num) {
+  return [].concat(_toConsumableArray(numToArrGenerate(num)))
+}
 
+/* Indexes classes */
 var Indexes = (function() {
   function Indexes(length, maxIncrement) {
     _classCallCheck(this, Indexes)
@@ -297,7 +295,6 @@ var IndexesRandom = (function(_Indexes2) {
 })(Indexes)
 
 /* cores */
-
 function loop(indexes, yielded) {
   var array
   return regeneratorRuntime.wrap(
@@ -319,7 +316,9 @@ function loop(indexes, yielded) {
             return yielded(array)
 
           case 8:
-            if (isFnc(indexes.prepare)) indexes.prepare()
+            if (isFnc(indexes.prepare)) {
+              indexes.prepare()
+            }
             _context2.next = 0
             break
 
@@ -351,25 +350,25 @@ var create = function create(indexes, yielded) {
 }
 
 var i2f = function i2f(iterator, promisify) {
-  var result = void 0
-  if (!promisify) {
-    var resultFn = function resultFn() {
-      return iterator.next()
-    }
-    result = resultFn
-  } else {
-    var resultFnP = function resultFnP() {
-      var _iterator$next = iterator.next(),
-        promise = _iterator$next.value,
-        done = _iterator$next.done
+  return !promisify ? i2fn(iterator) : i2afn(iterator)
+}
 
-      return Promise.resolve(promise).then(function(value) {
-        return { value: value, done: done }
-      })
-    }
-    result = resultFnP
+var i2fn = function i2fn(iterator) {
+  return function() {
+    return iterator.next()
   }
-  return result
+}
+
+var i2afn = function i2afn(iterator) {
+  return function() {
+    var _iterator$next = iterator.next(),
+      promise = _iterator$next.value,
+      done = _iterator$next.done
+
+    return Promise.resolve(promise).then(function(value) {
+      return { value: value, done: done }
+    })
+  }
 }
 
 var tiloop = function tiloop() {
@@ -382,10 +381,8 @@ var tiloop = function tiloop() {
     random = _ref3.random
 
   var Indexes = random ? IndexesRandom : IndexesZero
-  var iterator = create(
-    new Indexes({ length: length, maxIncrement: maxIncrement }),
-    yielded
-  )
+  var indexes = new Indexes({ length: length, maxIncrement: maxIncrement })
+  var iterator = create(indexes, yielded)
   return i2f(iterator, promisify)
 }
 
