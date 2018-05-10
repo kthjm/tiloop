@@ -14,8 +14,6 @@ yarn add tiloop
 ```
 
 ## Usage
-
-### `tiloop(config)`
 ```js
 import tiloop from 'tiloop'
 
@@ -27,21 +25,21 @@ const fn = tiloop({
 
 const { value, done } = fn()
 ```
-#### config
+### `tiloop(config)`
 
-##### `length: number`
+#### `length: number`
 Used for determine virtual-array length. (required)
 
-##### `maxIncrement: number`
+#### `maxIncrement: number`
 Used for determine increment in every `yield`. (required)
 
-##### `yielded: (array) => value`
+#### `yielded: (array) => value`
 Used for `yield`. (required)
 
-##### `promisify: boolean`
+#### `promisify: boolean`
 Whether `Promise.resolve()` to `value`. [default: `false`]
 
-##### `random: boolean`
+#### `random: boolean`
 Whether increment indexes by random. [default: `false`]
 
 ## modules
@@ -52,19 +50,19 @@ const indexes = new IndexesZero({ length, maxIncrement })
 const iterator = create(indexes, (array) => {})
 const afn = i2f(iterator, true)
 ```
-##### `create(indexes, yielded)`
+#### `create(indexes, yielded)`
 create iterator.
 
-##### `IndexesZero({ length, maxIncrement })`
+#### `IndexesZero({ length, maxIncrement })`
 indexes increments 0 to length - 1.
 
-##### `IndexesRandom({ length, maxIncrement })`
+#### `IndexesRandom({ length, maxIncrement })`
 indexes increments random.
 
-##### `i2f(iterator[, promisify])`
+#### `i2f(iterator[, promisify])`
 iterator to function.
 
-#### Note
+### Note
 `iterator` made by `create` has done with last `value`. In other words, using result as `iterable` (not `iterator`) **will lost the last `value`** 😔.
 
 ```js
