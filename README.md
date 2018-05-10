@@ -19,11 +19,14 @@ import tiloop from 'tiloop'
 
 const fn = tiloop({
   length: 10000,
-  maxIncrement: 30,
-  yielded: (indexes) => { /* result will be value */ }
+  maxIncrement: 4,
+  yielded: (indexes) => indexes
 })
 
-const { value, done } = fn()
+fn() // { done: false, value: [0, 1, 2, 3] }
+fn() // { done: false, value: [4, 5, 6, 7] }
+...
+fn() // { done: true, value: [9996, 9997, 9998, 9999] }
 ```
 ### `tiloop(config)`
 
